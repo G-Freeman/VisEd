@@ -1,40 +1,59 @@
 <template>
-	<section class="grid">
-		<svg class="grid_svg" id="main-grid" height="100%" width="100%">
+	<section class="grid" id="main-grid">
+		<div class="grid_debug">
+			<label v-text="`Small Lines: ${hSmallGridLineCount} x ${vSmallGridLineCount}`"></label>
+			<label v-text="`Big: ${hBigGridLineCount} x ${vBigGridLineCount}`"></label>
+			<label v-text="`Lines: ${gridLinesSumm}, Quads: ${gridLinesMulti}`"></label>
+		</div>
+		<svg class="grid_svg" height="100%" width="100%">
 			<!-- Back -->
 			<rect width="100%" height="100%" fill="#2a2a2a"/>
 			<!-- Small -->
-			<line v-for="(i,num) in hSmallGridLineCount"
-				  x1="0" :y1="(num * smallGridSpacing)+1"
-				  x2="100%" :y2="(num * smallGridSpacing)+1"
-				  :style="'stroke:'+smallGridColor+'; stroke-width:1px'"
-			/>
-			<line v-for="(i,num) in vSmallGridLineCount"
-				  :x1="(num * smallGridSpacing)+1" y1="0"
-				  :x2="(num * smallGridSpacing)+1" y2="100%"
-				  :style="'stroke:'+smallGridColor+'; stroke-width:1px'"
-			/>
-			<!-- Big -->
-			<line v-for="(i,num) in hBigGridLineCount"
-				  x1="0" :y1="(num * bigGridSpacing)+1"
-				  x2="100%" :y2="(num * bigGridSpacing)+1"
-				  :style="'stroke:'+bigGridColor+'; stroke-width:1px'"
-			/>
-			<line v-for="(i,num) in vBigGridLineCount"
-				  :x1="(num * bigGridSpacing)+1" y1="0"
-				  :x2="(num * bigGridSpacing)+1" y2="100%"
-				  :style="'stroke:'+bigGridColor+'; stroke-width:1px'"
-			/>
+			<template v-if="isInited">
+				<line v-for="(i,num) in hSmallGridLineCount" :key="`hs${num}`" v-if="defer(1)"
+					x1="0" :y1="(num * smallGridSpacing)+1"
+					x2="100%" :y2="(num * smallGridSpacing)+1"
+					:style="`stroke:${smallGridColor}`"
+				/>
+				<line v-for="(i,num) in vSmallGridLineCount" :key="`vs${num}`" v-if="defer(2)"
+					:x1="(num * smallGridSpacing)+1" y1="0"
+					:x2="(num * smallGridSpacing)+1" y2="100%"
+					:style="`stroke:${smallGridColor}`"
+				/>
+				<!-- Big -->
+				<line v-for="(i,num) in hBigGridLineCount" :key="`hb${num}`" v-if="defer(3)"
+					x1="0" :y1="(num * bigGridSpacing)+1"
+					x2="100%" :y2="(num * bigGridSpacing)+1"
+					:style="`stroke:${bigGridColor}`"
+				/>
+				<line v-for="(i,num) in vBigGridLineCount" :key="`vb${num}`" v-if="defer(4)"
+					:x1="(num * bigGridSpacing)+1" y1="0"
+					:x2="(num * bigGridSpacing)+1" y2="100%"
+					:style="`stroke:${bigGridColor}`"
+				/>
+			</template>
 		</svg>
 	</section>
 </template>
 
 <script>
 
+import Defer from '@/mixins/defer'
+import resizeDetector from 'element-resize-detector';
+
 export default {
 	name: "Grid",
+	mixins: [
+		Defer()
+	],
+	props:{
+		smallGridColor: {default:'#353535'},
+		bigGridColor:	{default:'#151515'},
+	},
 	data: function () {
 		return {
+			isInited: false,
+
 			bigGridSpacing: 200,
 			smallGridSpacing: 25,
 
@@ -45,24 +64,34 @@ export default {
 
 			gridObj: null,
 			gridWrapWidth: 0,
-			gridWrapHeight: 0
+			gridWrapHeight: 0,
+
+			isResizing: false,
+			resizingTimer: null,
 		}
 	},
-	props:{
-		smallGridColor: {default:'#353535'},
-		bigGridColor:	{default:'#151515'},
+	computed: {
+		gridLinesSumm()	 { return this.hSmallGridLineCount+this.vSmallGridLineCount+this.hBigGridLineCount+this.vBigGridLineCount },
+		gridLinesMulti() { return this.hSmallGridLineCount*this.vSmallGridLineCount },
 	},
 	methods: {
 		init() {
-			this.gridObj = document.getElementById('main-grid');
-			this.gridWrapWidth	= this.gridObj.clientWidth;
-			this.gridWrapHeight = this.gridObj.clientHeight;
+			setTimeout(()=>{
+				//let erd = resizeDetector();
+				let erdUltraFast = resizeDetector({
+					strategy: "scroll"
+				});
+				erdUltraFast.listenTo(document.getElementById("main-grid"), this.onResize);
+			},100)
 
-			this.vSmallGridLineCount = Math.ceil(this.gridWrapWidth/this.smallGridSpacing);
-			this.hSmallGridLineCount = Math.ceil(this.gridWrapHeight/this.smallGridSpacing);
+			this.isInited = true;
+		},
+		onResize(element) {
+			this.vSmallGridLineCount = Math.ceil(element.offsetWidth/this.smallGridSpacing);
+			this.hSmallGridLineCount = Math.ceil(element.offsetHeight/this.smallGridSpacing);
 
-			this.vBigGridLineCount = Math.ceil(this.gridWrapWidth/this.bigGridSpacing);
-			this.hBigGridLineCount = Math.ceil(this.gridWrapHeight/this.bigGridSpacing);
+			this.vBigGridLineCount = Math.ceil(element.offsetWidth/this.bigGridSpacing);
+			this.hBigGridLineCount = Math.ceil(element.offsetHeight/this.bigGridSpacing);
 		}
 	},
 	mounted() {
@@ -73,13 +102,21 @@ export default {
 
 <style scoped lang="scss">
 	.grid {
-		height: 400px;
-		background: black;
-		padding: 6px;
-		border-radius: 4px;
+		height: 100%;
+		&_debug {
+			position: absolute;
+			top: 12px;
+			left: 12px;
+			background: #00000040;
+			color: gray;
+			padding: 4px;
+			display: flex;
+			flex-direction: column;
+			border-radius: 4px;
+			z-index: 999;
+		}
 		&_svg {
-			height: 100%;
-			border-radius: 2px;
+
 		}
 	}
 </style>

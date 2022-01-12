@@ -30,9 +30,8 @@ export default Vue.extend({
 
 <style>
 	.wrap {
-		background: #d95d3d;
-		padding: 6px;
+		height: 100%;
+		background: #5b1d69;
 		position: relative;
-		border-radius: 6px;
 	}
 </style>
