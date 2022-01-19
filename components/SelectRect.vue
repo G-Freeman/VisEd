@@ -1,8 +1,10 @@
 <template>
 	<section class="selectContainer"
-		@mousedown	= "grid_onMouseDown"
-		@mouseup	= "grid_onMouseUp"
-		@mousemove	= "grid_onMouseMove"
+		@mouseenter		= "grid_onMouseEnter"
+		@mousedown.left	= "grid_onMouseDown"
+		@mouseup.left	= "grid_onMouseUp"
+		@mousemove		= "grid_onMouseMove"
+		@wheel			= "grid_onMouseWheel"
 	>
 		<div class="selectRect"
 			v-if="mouse.isPressed.left"
@@ -55,7 +57,7 @@
 			}
 		},
 		computed: {
-			isDev() { return true; },
+			isDev() { return false; },
 		},
 		methods: {
 			grid_onMouseDown(mouse) {
@@ -74,10 +76,17 @@
 				}
 			},
 			grid_onMouseUp(mouse) {
-				// this.mouseData.x2 = mouse.x;
-				// this.mouseData.y2 = mouse.y;
-				//this.mouse.isPressed.left = false;
-				// this.redraw();
+				this.mouse.isPressed.left = false;
+			},
+			grid_onMouseEnter(mouse) {
+				if(mouse.buttons===1) {
+					//...
+				} else {
+					this.mouse.isPressed.left = false;
+				}
+			},
+			grid_onMouseWheel(wheel) {
+				//...
 			},
 			redraw() {
 				this.rectStyleData.left	 	= this.mouse.start.x<this.mouse.end.x ? `${this.mouse.start.x}px` : `${this.mouse.end.x}px`;
@@ -99,11 +108,11 @@
 		width: 100%;
 		height: 100%;
 		user-select: none;
+		border: 1px #1d1d1d solid;
 		.selectRect {
-			position: absolute;
-			border: 1px white dashed;
-			background: #2b2b2c;
-			opacity: .4;
+			position: fixed;
+			border: 1px rgba(255,255,255,.3) dashed;
+			background: rgba(0,0,0,.1);
 			pointer-events: none;
 			overflow: hidden;
 			&_debug {
