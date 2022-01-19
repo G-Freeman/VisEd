@@ -1,6 +1,6 @@
 <template>
 	<section class="grid" id="main-grid">
-		<div class="grid_debug">
+		<div class="grid_debug" v-if="isDev">
 			<label v-text="`Small Lines: ${hSmallGridLineCount} x ${vSmallGridLineCount}`"></label>
 			<label v-text="`Big: ${hBigGridLineCount} x ${vBigGridLineCount}`"></label>
 			<label v-text="`Lines: ${gridLinesSumm}, Quads: ${gridLinesMulti}`"></label>
@@ -33,6 +33,7 @@
 				/>
 			</template>
 		</svg>
+		<selectRect/>
 	</section>
 </template>
 
@@ -40,9 +41,11 @@
 
 import Defer from '@/mixins/defer'
 import resizeDetector from 'element-resize-detector';
+import selectRect from '@/components/SelectRect.vue';
 
 export default {
 	name: "Grid",
+	components: { selectRect },
 	mixins: [
 		Defer()
 	],
@@ -71,6 +74,7 @@ export default {
 		}
 	},
 	computed: {
+		isDev()			 { return true; },
 		gridLinesSumm()	 { return this.hSmallGridLineCount+this.vSmallGridLineCount+this.hBigGridLineCount+this.vBigGridLineCount },
 		gridLinesMulti() { return this.hSmallGridLineCount*this.vSmallGridLineCount },
 	},
@@ -114,6 +118,8 @@ export default {
 			flex-direction: column;
 			border-radius: 4px;
 			z-index: 999;
+			user-select: none;
+			pointer-events: none;
 		}
 		&_svg {
 
