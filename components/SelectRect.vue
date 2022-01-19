@@ -8,8 +8,22 @@
 			v-if="mouse.isPressed.left"
 			:style="rectStyleData"
 		>
-			<div v-if="isDev">
-
+			<div class="selectRect_debug" v-if="isDev">
+				<div class="roll">
+					<div class="cell lt" v-text="'X:'+mouse.start.x+' Y:'+mouse.start.y"/>
+					<div class="cell ct" v-text="''"/>
+					<div class="cell rt" v-text="''"/>
+				</div>
+				<div class="roll">
+					<div class="cell lc" v-text="''"/>
+					<div class="cell cc" v-text="''"/>
+					<div class="cell rc" v-text="`W:${rectStyleData.width}`"/>
+				</div>
+				<div class="roll">
+					<div class="cell lb" v-text="''"/>
+					<div class="cell cb" v-text="`H:${rectStyleData.height}`"/>
+					<div class="cell rb" v-text="'X:'+mouse.end.x+' Y:'+mouse.end.y"/>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -62,7 +76,7 @@
 			grid_onMouseUp(mouse) {
 				// this.mouseData.x2 = mouse.x;
 				// this.mouseData.y2 = mouse.y;
-				this.mouse.isPressed.left = false;
+				//this.mouse.isPressed.left = false;
 				// this.redraw();
 			},
 			redraw() {
@@ -87,10 +101,28 @@
 		user-select: none;
 		.selectRect {
 			position: absolute;
-			border: 1px #ffffff dashed;
+			border: 1px white dashed;
 			background: #2b2b2c;
 			opacity: .4;
 			pointer-events: none;
+			overflow: hidden;
+			&_debug {
+				height: 100%;
+				color: white;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				.roll {
+					height: 100%;
+					display: flex;
+					justify-content: space-between;
+					.cell {
+						width: 100%;
+						margin: 2px;
+						background: #000000;
+					}
+				}
+			}
 		}
 	}
 </style>
