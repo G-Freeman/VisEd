@@ -9,7 +9,7 @@
 			</div>
 			<div class="grid_debug" v-if="isDev">
 				<label v-text="`Small Lines: ${hSmallGridLineCount} x ${vSmallGridLineCount}`"></label>
-				<label v-text="`Big: ${hBigGridLineCount} x ${vBigGridLineCount}`"></label>
+				<label v-text="`Big: ${Math.floor(hSmallGridLineCount/bigGridSpacing)} x ${Math.floor(vSmallGridLineCount/bigGridSpacing)}`"></label>
 				<label v-text="`Lines: ${gridLinesSumm}, Quads: ${gridLinesMulti}`"></label>
 				<label v-text="`Zoom: ${zoom.value.toFixed(1)}`"></label>
 			</div>
@@ -20,17 +20,81 @@
 			<!-- Small -->
 			<template v-if="isInited">
 				<line v-for="(i,num) in hSmallGridLineCount" :key="`hs${num}`" v-if="defer(1)"
-					x1="0"		:y1="(num * ((smallGridSpacing / (2**Math.floor(zoom.value)||1)) * (2**zoom.value) ))+1"
-					x2="100%"	:y2="(num * ((smallGridSpacing / (2**Math.floor(zoom.value)||1)) * (2**zoom.value) ))+1"
+					x1="0"		:y1="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
+					x2="100%"	:y2="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
 					:style="`
-						stroke:${num%8 ? smallGridColor : bigGridColor}
+						stroke:${ smallGridColor };
+						opacity:${
+						(num % (bigGridSpacing))
+							? (num%2 % (bigGridSpacing) )
+								?	(num % (bigGridSpacing*2)
+										? (num % (bigGridSpacing*2) )
+											? Number(zoom.value%1)||1
+											: .1
+										: Number(zoom.value%1)||1
+									)
+								:	1
+							: 1
+						};
 					`"
 				/>
 				<line v-for="(i,num) in vSmallGridLineCount" :key="`vs${num}`" v-if="defer(2)"
-					:x1="(num * ((smallGridSpacing / (2**Math.floor(zoom.value)||1)) * (2**zoom.value) ))+1" y1="0"
-					:x2="(num * ((smallGridSpacing / (2**Math.floor(zoom.value)||1)) * (2**zoom.value) ))+1" y2="100%"
+					:x1="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y1="0"
+					:x2="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y2="100%"
 					:style="`
-						stroke:${num%8 ? smallGridColor : bigGridColor};
+						stroke:${ smallGridColor };
+						opacity:${
+						(num % (bigGridSpacing))
+							? (num%2 % (bigGridSpacing) )
+								?	(num % (bigGridSpacing*2)
+										? (num % (bigGridSpacing*2) )
+											? Number(zoom.value%1)||1
+											: .1
+										: Number(zoom.value%1)||1
+									)
+								:	1
+							: 1
+						};
+					`"
+				/>
+
+
+				<line v-for="(i,num) in hSmallGridLineCount" :key="`hb${num}`" v-if="defer(1)"
+					  x1="0"		:y1="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
+					  x2="100%"	:y2="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
+					  :style="`
+						stroke:${ bigGridColor };
+						opacity:${
+						(num % (bigGridSpacing))
+							? (num%2 % (bigGridSpacing) )
+								?	(num % (bigGridSpacing*2)
+										? (num % (bigGridSpacing*2) )
+											? Number(zoom.value%1)||1
+											: .1
+										: Number(zoom.value%1)||1
+									)
+								:	1
+							: 1
+						};
+					`"
+				/>
+				<line v-for="(i,num) in vSmallGridLineCount" :key="`vb${num}`" v-if="defer(2)"
+					  :x1="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y1="0"
+					  :x2="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y2="100%"
+					  :style="`
+						stroke:${ bigGridColor };
+						opacity:${
+						(num % (bigGridSpacing))
+							? (num%2 % (bigGridSpacing) )
+								?	(num % (bigGridSpacing*2)
+										? (num % (bigGridSpacing*2) )
+											? Number(zoom.value%1)||1
+											: .1
+										: Number(zoom.value%1)||1
+									)
+								:	1
+							: 1
+						};
 					`"
 				/>
 
@@ -63,19 +127,17 @@ export default {
 		return {
 			isInited: false,
 
-			bigGridSpacing: 400,
-			smallGridSpacing: 25,
+			bigGridSpacing: 8,		// cells
+			smallGridSpacing: 24,	// px
 
 			hSmallGridLineCount: 0,
 			vSmallGridLineCount: 0,
-			hBigGridLineCount: 0,
-			vBigGridLineCount: 0,
 
 			zoom: {
-				value: 1,
-				step: .1,
-				min: 1,
-				max: 32
+				value: 20,
+				step: .05,
+				min: 2,
+				max: 40
 			},
 
 			gridObj: null,
@@ -91,7 +153,7 @@ export default {
 	},
 	computed: {
 		isDev()			 { return true; },
-		gridLinesSumm()	 { return this.hSmallGridLineCount+this.vSmallGridLineCount+this.hBigGridLineCount+this.vBigGridLineCount },
+		gridLinesSumm()	 { return this.hSmallGridLineCount+this.vSmallGridLineCount },
 		gridLinesMulti() { return this.hSmallGridLineCount*this.vSmallGridLineCount },
 	},
 	methods: {
@@ -112,8 +174,6 @@ export default {
 		redraw() {
 			this.vSmallGridLineCount = Math.ceil(this.gridObj.offsetWidth /(this.smallGridSpacing * (Math.floor(this.zoom.value)||1) )) * ((Math.floor(this.zoom.value)||1));
 			this.hSmallGridLineCount = Math.ceil(this.gridObj.offsetHeight/(this.smallGridSpacing * (Math.floor(this.zoom.value)||1) )) * ((Math.floor(this.zoom.value)||1));
-			this.vBigGridLineCount	 = Math.ceil(this.gridObj.offsetWidth /(this.bigGridSpacing	 * (Math.floor(this.zoom.value)||1) )) * ((Math.floor(this.zoom.value)||1));
-			this.hBigGridLineCount	 = Math.ceil(this.gridObj.offsetHeight/(this.bigGridSpacing	 * (Math.floor(this.zoom.value)||1) )) * ((Math.floor(this.zoom.value)||1));
 		},
 		grid_onMouseWheel(wheel) {
 			if(this.zoom.value >= this.zoom.min && wheel.deltaY < 0) { this.zoom.value += this.zoom.step; }
@@ -162,7 +222,6 @@ export default {
 					}
 				}
 			}
-
 		}
 		&_debug {
 			margin: 12px;
