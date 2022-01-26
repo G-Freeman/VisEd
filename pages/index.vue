@@ -1,7 +1,6 @@
 <template>
 	<section class="wrap">
-		<Grid id="0"/>
-		<div class="separator"/>
+<!--		<Grid id="0"/>-->
 		<Grid id="1"/>
 	</section>
 </template>
@@ -35,5 +34,6 @@ export default Vue.extend({
 		position: relative;
 		display: flex;
 		justify-content: space-between;
+		padding: 12px;
 	}
 </style>

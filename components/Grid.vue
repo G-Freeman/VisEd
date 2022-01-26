@@ -11,12 +11,23 @@
 				<label v-text="`Small Lines: ${hSmallGridLineCount} x ${vSmallGridLineCount}`"></label>
 				<label v-text="`Big: ${Math.floor(hSmallGridLineCount/bigGridSpacing)} x ${Math.floor(vSmallGridLineCount/bigGridSpacing)}`"></label>
 				<label v-text="`Lines: ${gridLinesSumm}, Quads: ${gridLinesMulti}`"></label>
-				<label v-text="`Zoom: ${zoom.value.toFixed(1)}`"></label>
+				<label v-text="`Zoom: ${zoom.value.toFixed((zoom.step.toString().length-2))}`"></label>
+				<div>
+					<label>Color test: [</label>
+					<label :style="`background:${colorTransformA};`" v-text="`${colorTransformA}`"/>
+					<label>]</label>
+				</div>
+				<div>
+					<label>Color test: [</label>
+					<label :style="`background:${Color.rgbToHex(colorTransformB)};`" v-text="`R:${colorTransformB.r}, G:${colorTransformB.g}, B:${colorTransformB.b}`"/>
+					<label>]</label>
+				</div>
+				<label v-text="`${fixedZoomMultyplier} : ${(1-fixedZoomMultyplier).toFixed(this.zoom.step.toString().length-2)}`"/>
 			</div>
 		</div>
 		<svg class="grid_svg" height="100%" width="100%">
 			<!-- Back -->
-			<rect width="100%" height="100%" fill="#2a2a2a"/>
+			<rect width="100%" height="100%" class="grid_svg_background"/>
 			<!-- Small -->
 			<template v-if="isInited">
 				<line v-for="(i,num) in hSmallGridLineCount" :key="`hs${num}`" v-if="defer(1)"
@@ -33,7 +44,7 @@
 											: .1
 										: Number(zoom.value%1)||1
 									)
-								:	1
+								: 1
 							: 1
 						};
 					`"
@@ -52,48 +63,48 @@
 											: .1
 										: Number(zoom.value%1)||1
 									)
-								:	1
+								: 1
 							: 1
 						};
 					`"
 				/>
 
-
-				<line v-for="(i,num) in hSmallGridLineCount" :key="`hb${num}`" v-if="defer(1)"
-					  x1="0"		:y1="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
-					  x2="100%"	:y2="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
-					  :style="`
-						stroke:${ bigGridColor };
-						opacity:${
-						(num % (bigGridSpacing))
-							? (num%2 % (bigGridSpacing) )
-								?	(num % (bigGridSpacing*2)
-										? (num % (bigGridSpacing*2) )
-											? Number(zoom.value%1)||1
-											: .1
-										: Number(zoom.value%1)||1
-									)
-								:	1
-							: 1
+				<!-- BIG -->
+				<line v-for="(i,num) in hBigGridLineCount" :key="`hb${num}`" v-if="defer(1)"
+					x1="0"		:y1="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
+					x2="100%"	:y2="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
+					:style="`
+						stroke:${
+							(num % (bigGridSpacing))
+								? (num%2 % (bigGridSpacing) )
+									?	(num % (bigGridSpacing*2)
+											? (num % (bigGridSpacing*2) )
+												? colorTransformA
+												: .1
+											: colorTransformA
+										)
+									: bigGridColor
+								: bigGridColor
+							};
 						};
 					`"
 				/>
-				<line v-for="(i,num) in vSmallGridLineCount" :key="`vb${num}`" v-if="defer(2)"
-					  :x1="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y1="0"
-					  :x2="(num * ( (smallGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y2="100%"
-					  :style="`
-						stroke:${ bigGridColor };
-						opacity:${
-						(num % (bigGridSpacing))
-							? (num%2 % (bigGridSpacing) )
-								?	(num % (bigGridSpacing*2)
-										? (num % (bigGridSpacing*2) )
-											? Number(zoom.value%1)||1
-											: .1
-										: Number(zoom.value%1)||1
-									)
-								:	1
-							: 1
+				<line v-for="(i,num) in vBigGridLineCount" :key="`vb${num}`" v-if="defer(2)"
+					:x1="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y1="0"
+					:x2="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y2="100%"
+					:style="`
+						stroke:${
+							(num % (bigGridSpacing))
+								? (num%2 % (bigGridSpacing) )
+									?	(num % (bigGridSpacing*2)
+											? (num % (bigGridSpacing*2) )
+												? colorTransformA
+												: .1
+											: colorTransformA
+										)
+									: bigGridColor
+								: bigGridColor
+							};
 						};
 					`"
 				/>
@@ -109,8 +120,7 @@
 import Defer from '@/mixins/defer'
 import resizeDetector from 'element-resize-detector';
 import selectRect from '@/components/SelectRect.vue';
-
-
+import Color from "@/script/data/color";
 
 export default {
 	name: "Grid",
@@ -122,21 +132,23 @@ export default {
 		id:				{default: '0'		},
 		smallGridColor: {default: '#353535'	},
 		bigGridColor:	{default: '#151515'	},
+		// smallGridColor: {default: '#00ff00'	},
+		// bigGridColor:	{default: '#ff0000'	},
 	},
 	data: function () {
 		return {
 			isInited: false,
 
 			bigGridSpacing: 8,		// cells
-			smallGridSpacing: 24,	// px
+			smallGridSpacing: 16,	// px
 
 			hSmallGridLineCount: 0,
 			vSmallGridLineCount: 0,
 
 			zoom: {
-				value: 20,
+				value: 1,
 				step: .05,
-				min: 2,
+				min: 1,
 				max: 40
 			},
 
@@ -152,9 +164,15 @@ export default {
 		console.log('SETUP')
 	},
 	computed: {
-		isDev()			 { return true; },
-		gridLinesSumm()	 { return this.hSmallGridLineCount+this.vSmallGridLineCount },
-		gridLinesMulti() { return this.hSmallGridLineCount*this.vSmallGridLineCount },
+		isDev()			 		{ return true; },
+		Color()					{ return Color },
+		gridLinesSumm()	 		{ return this.hSmallGridLineCount+this.vSmallGridLineCount },
+		gridLinesMulti() 		{ return this.hSmallGridLineCount*this.vSmallGridLineCount },
+		hBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
+		vBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
+		fixedZoomMultyplier()	{ return Number(Number(this.zoom.value%1||1).toFixed(this.zoom.step.toString().length-2)); },
+		colorTransformA()		{ return Color.hexTranslateToHex('#242424', this.bigGridColor, this.fixedZoomMultyplier) },
+		colorTransformB()		{ return Color.rgbTranslateToRgb(Color.hexToRgb(this.smallGridColor), Color.hexToRgb(this.bigGridColor), this.fixedZoomMultyplier) },
 	},
 	methods: {
 		init() {
@@ -196,7 +214,7 @@ export default {
 		//height: 100%;
 		overflow: hidden;
 		//border: 8px crimson solid;
-		margin: 12px;
+		background: #1d1d1d;
 		&_tools {
 			position: absolute;
 			top: 0;
@@ -204,7 +222,6 @@ export default {
 			.zoom {
 				display: flex;
 				border-radius: 4px;
-				background: #00000040;
 				padding: 2px;
 				margin: 12px;
 				border: 1px solid rgba(0, 0, 0, 0.25);
@@ -225,7 +242,7 @@ export default {
 		}
 		&_debug {
 			margin: 12px;
-			background: rgba(0, 0, 0, 0.25);
+			//background: white;
 			color: #9ca181;
 			display: flex;
 			padding: 4px;
@@ -237,7 +254,12 @@ export default {
 			border: 1px solid rgba(0, 0, 0, 0.25);
 		}
 		&_svg {
-
+			&_background {
+				fill: #2a2a2a
+			}
+			line {
+				stroke-width: 2px;
+			}
 		}
 	}
 </style>
