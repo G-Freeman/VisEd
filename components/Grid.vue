@@ -9,20 +9,9 @@
 			</div>
 			<div class="grid_debug" v-if="isDev">
 				<label v-text="`Small Lines: ${hSmallGridLineCount} x ${vSmallGridLineCount}`"></label>
-				<label v-text="`Big: ${Math.floor(hSmallGridLineCount/bigGridSpacing)} x ${Math.floor(vSmallGridLineCount/bigGridSpacing)}`"></label>
+				<label v-text="`Big: ${Math.floor(hSmallGridLineCount/bigGridSpacing+1)} x ${Math.floor(vSmallGridLineCount/bigGridSpacing+1)}`"></label>
 				<label v-text="`Lines: ${gridLinesSumm}, Quads: ${gridLinesMulti}`"></label>
-				<label v-text="`Zoom: ${zoom.value.toFixed((zoom.step.toString().length-2))}`"></label>
-				<div>
-					<label>Color test: [</label>
-					<label :style="`background:${colorTransformA};`" v-text="`${colorTransformA}`"/>
-					<label>]</label>
-				</div>
-				<div>
-					<label>Color test: [</label>
-					<label :style="`background:${Color.rgbToHex(colorTransformB)};`" v-text="`R:${colorTransformB.r}, G:${colorTransformB.g}, B:${colorTransformB.b}`"/>
-					<label>]</label>
-				</div>
-				<label v-text="`${fixedZoomMultyplier} : ${(1-fixedZoomMultyplier).toFixed(this.zoom.step.toString().length-2)}`"/>
+				<label v-text="`Zoom: ${zoom.value.toFixed((zoom.step.toString().length-2))} [${parseFloat(fixedZoomMultyplier)}]`"></label>
 			</div>
 		</div>
 		<svg class="grid_svg" height="100%" width="100%">
@@ -70,7 +59,7 @@
 				/>
 
 				<!-- BIG -->
-				<line v-for="(i,num) in hBigGridLineCount" :key="`hb${num}`" v-if="defer(1)"
+				<line v-for="(i,num) in Math.floor(hSmallGridLineCount/bigGridSpacing+1)" :key="`hb${num}`" v-if="defer(1)"
 					x1="0"		:y1="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
 					x2="100%"	:y2="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
 					:style="`
@@ -80,7 +69,7 @@
 									?	(num % (bigGridSpacing*2)
 											? (num % (bigGridSpacing*2) )
 												? colorTransformA
-												: .1
+												: '#ff0000'
 											: colorTransformA
 										)
 									: bigGridColor
@@ -89,7 +78,7 @@
 						};
 					`"
 				/>
-				<line v-for="(i,num) in vBigGridLineCount" :key="`vb${num}`" v-if="defer(2)"
+				<line v-for="(i,num) in Math.floor(vSmallGridLineCount/bigGridSpacing+1)" :key="`vb${num}`" v-if="defer(2)"
 					:x1="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y1="0"
 					:x2="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y2="100%"
 					:style="`
@@ -99,7 +88,7 @@
 									?	(num % (bigGridSpacing*2)
 											? (num % (bigGridSpacing*2) )
 												? colorTransformA
-												: .1
+												: '#ff0000'
 											: colorTransformA
 										)
 									: bigGridColor
@@ -132,8 +121,6 @@ export default {
 		id:				{default: '0'		},
 		smallGridColor: {default: '#353535'	},
 		bigGridColor:	{default: '#3b3b3b'	},
-		// smallGridColor: {default: '#00ff00'	},
-		// bigGridColor:	{default: '#ff0000'	},
 	},
 	data: function () {
 		return {
@@ -146,7 +133,7 @@ export default {
 			vSmallGridLineCount: 0,
 
 			zoom: {
-				value: 1,
+				value: 10,
 				step: .05,
 				min: 1,
 				max: 40
@@ -170,7 +157,7 @@ export default {
 		gridLinesMulti() 		{ return this.hSmallGridLineCount*this.vSmallGridLineCount },
 		hBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
 		vBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
-		fixedZoomMultyplier()	{ return Number(Number(this.zoom.value%1||1).toFixed(this.zoom.step.toString().length-2)); },
+		fixedZoomMultyplier()	{ return Number(this.zoom.value%1||1).toFixed(this.zoom.step.toString().length-2); },
 		colorTransformA()		{ return Color.hexTranslateToHex(this.smallGridColor, this.bigGridColor, this.fixedZoomMultyplier) },
 		colorTransformB()		{ return Color.rgbTranslateToRgb(Color.hexToRgb(this.smallGridColor), Color.hexToRgb(this.bigGridColor), this.fixedZoomMultyplier) },
 	},
