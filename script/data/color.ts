@@ -6,11 +6,11 @@ export default class Color {
 			r: parseInt(result[1], 16),
 			g: parseInt(result[2], 16),
 			b: parseInt(result[3], 16)
-		} : null;
+		} : {r:0,g:0,b:0};
 	}
 
-	static rgbToHex = (r:any, g:any, b:any) =>
-		"#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
+	static rgbToHex = (rgb:{r:number, g:number, b:number}) =>
+		"#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1)
 
 	static rgbToLightness = (r:number,g:number,b:number) =>
 		1/2 * (Math.max(r,g,b) + Math.min(r,g,b));
@@ -56,4 +56,21 @@ export default class Color {
 		const [hue, saturation, lightness] = Color.rgbToHsl(r,g,b);
 		return {r, g, b, hue, saturation, lightness};
 	}
+
+	static rgbTranslateToRgb = (rgbA:{r:number,g:number,b:number},rgbB:{r:number,g:number,b:number},value=0) => {
+		return {
+			r: Number(Number(rgbA.r * (1-value)).toFixed(0)) + Number(Number(rgbB.r * (value)).toFixed(0)),
+			g: Number(Number(rgbA.g * (1-value)).toFixed(0)) + Number(Number(rgbB.g * (value)).toFixed(0)),
+			b: Number(Number(rgbA.b * (1-value)).toFixed(0)) + Number(Number(rgbB.b * (value)).toFixed(0)),
+		}
+	}
+
+	static hexTranslateToHex = (hexA:any,hexB:any,value=0) =>
+		Color.rgbToHex(
+			Color.rgbTranslateToRgb(
+				Color.hexToRgb(hexA),
+				Color.hexToRgb(hexB),
+				value
+			)
+		);
 }
