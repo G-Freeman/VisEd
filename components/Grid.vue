@@ -30,11 +30,11 @@
 								?	(num % (bigGridSpacing*2)
 										? (num % (bigGridSpacing*2) )
 											? Number(zoom.value%1)||1
-											: .1
+											: 0
 										: Number(zoom.value%1)||1
 									)
 								: 1
-							: 1
+							: 0
 						};
 					`"
 				/>
@@ -49,11 +49,11 @@
 								?	(num % (bigGridSpacing*2)
 										? (num % (bigGridSpacing*2) )
 											? Number(zoom.value%1)||1
-											: .1
+											: 0
 										: Number(zoom.value%1)||1
 									)
 								: 1
-							: 1
+							: 0
 						};
 					`"
 				/>
@@ -119,8 +119,8 @@ export default {
 	],
 	props:{
 		id:				{default: '0'		},
-		smallGridColor: {default: '#353535'	},
-		bigGridColor:	{default: '#3b3b3b'	},
+		smallGridColor: {default: '#282828'	},
+		bigGridColor:	{default: '#2f2f2f'	},
 	},
 	data: function () {
 		return {
@@ -159,7 +159,6 @@ export default {
 		vBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
 		fixedZoomMultyplier()	{ return Number(this.zoom.value%1||1).toFixed(this.zoom.step.toString().length-2); },
 		colorTransformA()		{ return Color.hexTranslateToHex(this.smallGridColor, this.bigGridColor, this.fixedZoomMultyplier) },
-		colorTransformB()		{ return Color.rgbTranslateToRgb(Color.hexToRgb(this.smallGridColor), Color.hexToRgb(this.bigGridColor), this.fixedZoomMultyplier) },
 	},
 	methods: {
 		init() {
@@ -242,7 +241,7 @@ export default {
 		}
 		&_svg {
 			&_background {
-				fill: #2a2a2a
+				fill: #222222
 			}
 			line {
 				stroke-width: 1px;
