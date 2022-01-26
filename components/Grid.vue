@@ -131,7 +131,7 @@ export default {
 	props:{
 		id:				{default: '0'		},
 		smallGridColor: {default: '#353535'	},
-		bigGridColor:	{default: '#151515'	},
+		bigGridColor:	{default: '#3b3b3b'	},
 		// smallGridColor: {default: '#00ff00'	},
 		// bigGridColor:	{default: '#ff0000'	},
 	},
@@ -171,7 +171,7 @@ export default {
 		hBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
 		vBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
 		fixedZoomMultyplier()	{ return Number(Number(this.zoom.value%1||1).toFixed(this.zoom.step.toString().length-2)); },
-		colorTransformA()		{ return Color.hexTranslateToHex('#242424', this.bigGridColor, this.fixedZoomMultyplier) },
+		colorTransformA()		{ return Color.hexTranslateToHex(this.smallGridColor, this.bigGridColor, this.fixedZoomMultyplier) },
 		colorTransformB()		{ return Color.rgbTranslateToRgb(Color.hexToRgb(this.smallGridColor), Color.hexToRgb(this.bigGridColor), this.fixedZoomMultyplier) },
 	},
 	methods: {
@@ -214,7 +214,7 @@ export default {
 		//height: 100%;
 		overflow: hidden;
 		//border: 8px crimson solid;
-		background: #1d1d1d;
+		background: #374336;
 		&_tools {
 			position: absolute;
 			top: 0;
@@ -258,7 +258,7 @@ export default {
 				fill: #2a2a2a
 			}
 			line {
-				stroke-width: 2px;
+				stroke-width: 1px;
 			}
 		}
 	}
