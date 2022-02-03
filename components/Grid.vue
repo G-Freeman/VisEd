@@ -3,17 +3,6 @@
 		:id="`grid-${id}`"
 		@wheel = "grid_onMouseWheel"
 	>
-		<div class="grid_tools">
-			<div class="zoom">
-				<div class="zoom_preset" v-for="i in 3" v-text="i"/>
-			</div>
-			<div class="grid_debug" v-if="isDev">
-				<label v-text="`Small Lines: ${hSmallGridLineCount} x ${vSmallGridLineCount}`"></label>
-				<label v-text="`Big: ${Math.floor(hSmallGridLineCount/bigGridSpacing+1)} x ${Math.floor(vSmallGridLineCount/bigGridSpacing+1)}`"></label>
-				<label v-text="`Lines: ${gridLinesSumm}, Quads: ${gridLinesMulti}`"></label>
-				<label v-text="`Zoom: ${zoom.value.toFixed((zoom.step.toString().length-2))} [${parseFloat(fixedZoomMultyplier)}]`"></label>
-			</div>
-		</div>
 		<svg class="grid_svg" height="100%" width="100%">
 			<!-- Back -->
 			<rect width="100%" height="100%" class="grid_svg_background"/>
@@ -59,7 +48,7 @@
 				/>
 
 				<!-- BIG -->
-				<line v-for="(i,num) in Math.floor(hSmallGridLineCount/bigGridSpacing+1)" :key="`hb${num}`" v-if="defer(1)"
+				<line v-for="(i,num) in hBigGridLineCount" :key="`hb${num}`" v-if="defer(1)"
 					x1="0"		:y1="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
 					x2="100%"	:y2="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ))+1"
 					:style="`
@@ -78,7 +67,7 @@
 						};
 					`"
 				/>
-				<line v-for="(i,num) in Math.floor(vSmallGridLineCount/bigGridSpacing+1)" :key="`vb${num}`" v-if="defer(2)"
+				<line v-for="(i,num) in vBigGridLineCount" :key="`vb${num}`" v-if="defer(2)"
 					:x1="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y1="0"
 					:x2="(num * ( (smallGridSpacing*bigGridSpacing/(2**Math.floor(zoom.value)||1) ) * (2**zoom.value) ) )+1" y2="100%"
 					:style="`
@@ -100,6 +89,17 @@
 
 			</template>
 		</svg>
+		<div class="grid_tools">
+			<div class="zoom">
+				<div class="zoom_preset" v-for="i in 3" v-text="i"/>
+			</div>
+			<div class="grid_debug" v-if="isDev">
+				<label v-text="`Small Lines: ${hSmallGridLineCount} x ${vSmallGridLineCount}`"></label>
+				<label v-text="`Big: ${Math.floor(hSmallGridLineCount/bigGridSpacing+1)} x ${Math.floor(vSmallGridLineCount/bigGridSpacing+1)}`"></label>
+				<label v-text="`Lines: ${gridLinesSumm}, Quads: ${gridLinesMulti}`"></label>
+				<label v-text="`Zoom: ${zoom.value.toFixed((zoom.step.toString().length-2))} [${parseFloat(fixedZoomMultyplier)}]`"></label>
+			</div>
+		</div>
 		<selectRect/>
 	</section>
 </template>
@@ -133,9 +133,10 @@ export default {
 			vSmallGridLineCount: 0,
 
 			zoom: {
-				value: 10,
+				initial: 20,
+				value: 0,
 				step: .05,
-				min: 1,
+				min: 2,
 				max: 40
 			},
 
@@ -155,8 +156,8 @@ export default {
 		Color()					{ return Color },
 		gridLinesSumm()	 		{ return this.hSmallGridLineCount+this.vSmallGridLineCount },
 		gridLinesMulti() 		{ return this.hSmallGridLineCount*this.vSmallGridLineCount },
-		hBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
-		vBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)},
+		hBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)+1},
+		vBigGridLineCount()		{ return Math.floor(this.hSmallGridLineCount/this.bigGridSpacing)+1},
 		fixedZoomMultyplier()	{ return Number(this.zoom.value%1||1).toFixed(this.zoom.step.toString().length-2); },
 		colorTransformA()		{ return Color.hexTranslateToHex(this.smallGridColor, this.bigGridColor, this.fixedZoomMultyplier) },
 	},

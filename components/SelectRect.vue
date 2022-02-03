@@ -1,8 +1,8 @@
 <template>
 	<section class="selectContainer"
 		@mouseenter		= "grid_onMouseEnter"
-		@mousedown.left	= "grid_onMouseDown"
-		@mouseup.left	= "grid_onMouseUp"
+		@mousedown		= "grid_onMouseDown"
+		@mouseup		= "grid_onMouseUp"
 		@mousemove		= "grid_onMouseMove"
 		@wheel			= "grid_onMouseWheel"
 	>
@@ -60,12 +60,21 @@
 			isDev() { return false; },
 		},
 		methods: {
-			grid_onMouseDown(mouse) {
-				this.mouse.start.x	= mouse.x;
-				this.mouse.start.y	= mouse.y;
-				this.mouse.end.x	= mouse.x;
-				this.mouse.end.y	= mouse.y;
-				this.mouse.isPressed.left = true;
+			grid_onMouseDown(e) {
+				switch (e.button) {
+					case 0: {
+						this.mouse.start.x	= e.x;
+						this.mouse.start.y	= e.y;
+						this.mouse.end.x	= e.x;
+						this.mouse.end.y	= e.y;
+						this.mouse.isPressed.left = true;
+					} break;
+					case 1: {} break;
+					case 2: {} break;
+					case 3: {} break;
+					case 4: {} break;
+					default: { console.log(e.button); }
+				}
 				this.redraw();
 			},
 			grid_onMouseMove(mouse) {

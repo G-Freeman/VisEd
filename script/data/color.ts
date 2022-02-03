@@ -12,10 +12,10 @@ export default class Color {
 	static rgbToHex = (rgb:{r:number, g:number, b:number}) =>
 		"#" + ((1 << 24) + (rgb.r << 16) + (rgb.g << 8) + rgb.b).toString(16).slice(1)
 
-	static rgbToLightness = (r:number,g:number,b:number) =>
+	private static rgbToLightness = (r:number,g:number,b:number) =>
 		1/2 * (Math.max(r,g,b) + Math.min(r,g,b));
 
-	static rgbToSaturation = (r:number,g:number,b:number) => {
+	private static rgbToSaturation = (r:number,g:number,b:number) => {
 		const L = Color.rgbToLightness(r,g,b);
 		const max = Math.max(r,g,b);
 		const min = Math.min(r,g,b);
@@ -24,7 +24,7 @@ export default class Color {
 			: (max - min)/(1 - Math.abs(2 * L - 1));
 	};
 
-	static rgbToHue = (r:number,g:number,b:number) => Math.round(
+	private static rgbToHue = (r:number,g:number,b:number) => Math.round(
 		Math.atan2(
 			Math.sqrt(3) * (g - b),
 			2 * r - g - b,
